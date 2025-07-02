@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Condition_Strategy {
+namespace Strategy.Attributes {
     public abstract class SpawnConditionAttributesSo : ScriptableObject {
         
     }

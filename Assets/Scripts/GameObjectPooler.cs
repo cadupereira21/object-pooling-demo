@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Pool;
 
-
 public class GameObjectPooler {
 
     // Object to be instantiated
