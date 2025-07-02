@@ -1,60 +1,61 @@
-﻿using UnityEngine;
-using UnityEngine.Pool;
+﻿using System.Collections.Generic;
+using JetBrains.Annotations;
+using UnityEngine;
 
 public class GameObjectPooler {
 
+    // Where the objects will be parented in the hierarchy
+    private readonly GameObject _parent;
+
     // Object to be instantiated
-    private readonly GameObject _prefab;
+    private readonly GameObject _object;
 
-    private readonly ObjectPool<GameObject> _objectPool;
-
-    // Default size of the pool
-    private int _defaultSize;
+    private readonly List<GameObject> _objectPool = new ();
+    
+    private readonly Queue<int> _inactiveObjects = new ();
 
     // Maximum size of the pool
-    private int _maxSize;
+    private readonly int _maxSize;
 
-    public GameObjectPooler(GameObject prefab, int defaultSize, int maxSize) {
-        _prefab = prefab;
-        _defaultSize = defaultSize;
+    public GameObjectPooler(GameObject obj, int defaultSize, int maxSize, GameObject parent = null) {
+        _object = obj;
         _maxSize = maxSize;
-        _objectPool = new ObjectPool<GameObject>(CreatePooledObject, OnGetFromPool, OnReturnToPool, OnDestroyPooledObject, true, defaultSize, maxSize);
+        _parent = parent;
+        
+        for (int i = 0; i < defaultSize; i++) {
+            CreatePooledObject();
+        }
     }
     
-    // Wrapper function for pool.Get. Gets object and sets position.
-    public GameObject GetObject(Vector3 position)
-    {
-        GameObject obj = _objectPool.Get();
-        obj.transform.position = position;
-        return obj;
+    public ObjectPoolerDto GetObject(Vector3 position) {
+        if (_inactiveObjects.Count == 0) {
+            CreatePooledObject();
+        }
+        
+        ObjectPoolerDto dto = GetInactiveObject();
+        dto.Obj.transform.position = position;
+        dto.Obj.gameObject.SetActive(true);
+        return dto;
     }
 
-    // Wrapper function for pool.Release
-    public void ReleaseObject(GameObject obj)
-    {
-        _objectPool.Release(obj);
+    public void ReleaseObject(int i) {
+        _inactiveObjects.Enqueue(i);
+        _objectPool[i].gameObject.SetActive(false);
     }
     
-    // Return a brand new GameObject instance for our pool to use.
-    // We have to specify GameObject.Instantiate because this isn't
-    // a Monobehavior.    
-    private GameObject CreatePooledObject() {
-        GameObject newObject = Object.Instantiate(_prefab);
-        return newObject;
+    private void CreatePooledObject() {
+        if (_objectPool.Count >= _maxSize) {
+            return;
+        }
+        
+        GameObject newObject = Object.Instantiate(_object, _parent?.transform);
+        newObject.gameObject.SetActive(false);
+        _objectPool.Add(newObject);
+        _inactiveObjects.Enqueue(_objectPool.Count - 1);
     }
-    
-    // When an object is taken from the pool, activate it.
-    private static void OnGetFromPool(GameObject pooledObject) {
-        pooledObject.SetActive(true);
-    }
-    
-    // When an object is returned to the pool, deactivate it.
-    private static void OnReturnToPool(GameObject pooledObject) {
-        pooledObject.SetActive(false);
-    }
-    
-    // When the pool discards an object, destroy the GameObject.
-    private static void OnDestroyPooledObject(GameObject pooledObject) {
-        Object.Destroy(pooledObject);
+        
+    private ObjectPoolerDto GetInactiveObject() {
+        int index = _inactiveObjects.Dequeue();
+        return new ObjectPoolerDto(_objectPool[index], index);
     }
 }

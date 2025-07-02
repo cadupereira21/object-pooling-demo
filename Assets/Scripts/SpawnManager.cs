@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using Strategy.Attributes;
 using Strategy.SpawnCondition;
 using Strategy.SpawnPosition;
@@ -13,13 +14,24 @@ public class SpawnManager : MonoBehaviour {
     [SerializeField] 
     private SpawnPosition spawnPosition = SpawnPosition.FIXED;
     
-    [Tooltip("The condition strategy which will be used to determine when to spawn objects.")]
+    [Tooltip("The condition strategy which will be used to determine when to spawn objects. \n" +
+             "TIMER: Spawns objects at regular intervals. \n" +
+             "RANDOM_TIMER: Spawns objects at random intervals between two numbers. \n" +
+             "CONDITION: Spawns objects at a specified condition.\n" +
+             "RANDOM: Spawns objects at random intervals.")]
     [SerializeField]
     private SpawnCondition spawnCondition = SpawnCondition.TIMER;
     
     [Header("Spawn Attributes")]
     [SerializeField]
+    [Tooltip("Attributes for the spawn condition. \n" +
+             "This should be a ScriptableObject that contains the condition data.")]
     private SpawnConditionAttributesSo spawnConditionAttributeSo;
+    
+    [Tooltip("Attributes for the spawn position. \n" +
+             "This should be a ScriptableObject that contains the position data.")]
+    [SerializeField]
+    private SpawnPositionAttributeSo spawnPositionAttributeSo;
     
     [Header("Object Pooler Attributes")]
     [Tooltip("Prefab to be instantiated by the pooler. \n" +
@@ -37,9 +49,6 @@ public class SpawnManager : MonoBehaviour {
     [SerializeField]
     private int maxSize;
     
-    [SerializeField]
-    private SpawnPositionAttributeSo spawnPositionAttributeSo;
-    
     private SpawnConditionStrategy _spawnConditionStrategy;
     
     private SpawnPositionStrategy _spawnPositionStrategy;
@@ -49,7 +58,7 @@ public class SpawnManager : MonoBehaviour {
     private void Awake() {
         _spawnConditionStrategy = SpawnConditionStrategyFactory.GetStrategy(spawnCondition, spawnConditionAttributeSo);
         _spawnPositionStrategy = SpawnPositionStrategyFactory.GetStrategy(spawnPosition, spawnPositionAttributeSo);
-        _gameObjectPooler = new GameObjectPooler(prefab, defaultSize, maxSize);
+        _gameObjectPooler = new GameObjectPooler(prefab, defaultSize, maxSize, this.gameObject);
     }
 
     private void Update() {
@@ -59,10 +68,13 @@ public class SpawnManager : MonoBehaviour {
     }
 
     private void SpawnObject() {
-        GameObject obj = _gameObjectPooler.GetObject(_spawnPositionStrategy.GetPosition());
+        ObjectPoolerDto dto = _gameObjectPooler.GetObject(_spawnPositionStrategy.GetPosition());
+        if (dto.Obj.TryGetComponent(out Ball ball)) {
+            ball.Init(this, dto.IndexAtPooler);
+        }
     }
 
-    public void DespawnObject(GameObject obj) {
-        _gameObjectPooler.ReleaseObject(obj);
+    public void DespawnObject(int index) {
+        _gameObjectPooler.ReleaseObject(index);
     }
 }
