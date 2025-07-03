@@ -1,5 +1,5 @@
 ﻿namespace Strategy.SpawnCondition {
     public enum SpawnCondition {
-        TIMER, RANDOM_TIMER, CONDITION, RANDOM
+        TIMER, TIME_RANGE
     }
 }

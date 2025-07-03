@@ -16,6 +16,10 @@ public class GameObjectPooler {
 
     // Maximum size of the pool
     private readonly int _maxSize;
+    
+    public int CountAllActive => _objectPool.Count - _inactiveObjects.Count;
+    
+    public int CountAllInactive => _inactiveObjects.Count;
 
     public GameObjectPooler(GameObject obj, int defaultSize, int maxSize, GameObject parent = null) {
         _object = obj;
@@ -38,9 +42,14 @@ public class GameObjectPooler {
         return dto;
     }
 
-    public void ReleaseObject(int i) {
+    public void ReleaseObject(int i, bool resetRigidbody = false) {
         _inactiveObjects.Enqueue(i);
-        _objectPool[i].gameObject.SetActive(false);
+        GameObject pooledObject = _objectPool[i];
+        pooledObject.SetActive(false);
+
+        if (resetRigidbody) {
+            ResetRigidbody(pooledObject);
+        }
     }
     
     private void CreatePooledObject() {
@@ -57,5 +66,12 @@ public class GameObjectPooler {
     private ObjectPoolerDto GetInactiveObject() {
         int index = _inactiveObjects.Dequeue();
         return new ObjectPoolerDto(_objectPool[index], index);
+    }
+    
+    private static void ResetRigidbody(GameObject pooledObject) {
+        if (!pooledObject.TryGetComponent(out Rigidbody rb)) return;
+        
+        rb.linearVelocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
     }
 }

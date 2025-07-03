@@ -579,10 +579,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 654fda9e164342c4aa06b3fd59749aa1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnPosition: 0
+  spawnPosition: 1
   spawnCondition: 0
   spawnConditionAttributeSo: {fileID: 11400000, guid: 804e19f9e50d59944a2a93dee4660c77, type: 2}
-  spawnPositionAttributeSo: {fileID: 11400000, guid: f4630769368384346b2eddb8288cb94f, type: 2}
+  spawnPositionAttributeSo: {fileID: 11400000, guid: 34d2553552edd4e44b7c4288f0cd9b3d, type: 2}
   prefab: {fileID: 688516805753566912, guid: 3cdd4488ad6561d419f7800ec0ce7789, type: 3}
   defaultSize: 10
   maxSize: 20

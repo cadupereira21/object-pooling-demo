@@ -75,6 +75,6 @@ public class SpawnManager : MonoBehaviour {
     }
 
     public void DespawnObject(int index) {
-        _gameObjectPooler.ReleaseObject(index);
+        _gameObjectPooler.ReleaseObject(index, resetRigidbody: true);
     }
 }

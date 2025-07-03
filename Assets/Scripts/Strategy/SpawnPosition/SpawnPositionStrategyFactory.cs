@@ -4,9 +4,10 @@ using System.ComponentModel;
 using Strategy.Attributes;
 
 namespace Strategy.SpawnPosition {
-    public class SpawnPositionStrategyFactory {
+    public abstract class SpawnPositionStrategyFactory {
         private static readonly Dictionary<SpawnPosition, SpawnPositionStrategy> Strategies = new () {
-                { SpawnPosition.FIXED, new FixedPositionSpawnStrategy() }
+                { SpawnPosition.FIXED, new FixedPositionSpawnStrategy() }, 
+                { SpawnPosition.RANGE, new RangePositionSpawnStrategy() }
             };
         
         public static SpawnPositionStrategy GetStrategy(SpawnPosition position, SpawnPositionAttributeSo attributesSo) {
