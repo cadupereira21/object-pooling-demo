@@ -14,7 +14,11 @@ Instantiating and destroying objects are CPU-consuming processes. Therefore, whe
 
 In order to create a pool of objects in your game, you'll need to create and empty object in the scene and add the *SpawnManager* as a component. The *SpawnManager* will use the *GameObjectPooler* class to manage the pool of objects.
 
-You can override the SpawnManager completely in order to create your game's logic to spawn/despawn objects.
+Basically, the _GameObjectPooler_ will initialize by instantiating the number of objects defined in the DefaultSize attribute and storing them in the ObjectPool attribute. Every object is instantiated inactive and it's index in the pool is queued in the InactiveObjects. Whenever we want to activate an object, the pooler will dequeue an index and activate the object associated to that index in the pool. If there are no inactive objects, the pooler will then pool a new object and activate it (always respecting the MaxSize attribute).
+
+You can override the SpawnManager completely in order to create your game's logic to spawn/despawn objects. However, your spawn object prefab will need to have a script that inherits _PooledObject_, so it can control when to despawn.
+
+## Main classes involved
 
 ### GameObjectPooler
 
